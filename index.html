@@ -1,292 +1,1026 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Grussap</title><link rel="icon" href="logo.png">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<style>
-:root{--hd:#1f6f5f;--ac:#22a06b;--out:#e2f7cb;--bg:#efe7dd;--bd:#e9edef;--mu:#667781}
-*{box-sizing:border-box;margin:0}html,body{height:100%}
-body{font:15px system-ui,-apple-system,Segoe UI,sans-serif;color:#111b21;background:#d9dbd5}
-button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}input{font:inherit}
-.hide{display:none!important}
-#auth{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--hd);padding:20px;color:#fff}
-#auth .box{background:#fff;color:#111b21;border-radius:16px;padding:24px;width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px}
-#auth h1{font-size:26px}
-.in{padding:12px;border:1px solid var(--bd);border-radius:10px;width:100%}
-.btn{background:var(--ac);color:#fff;border-radius:10px;padding:12px;font-weight:600}
-.lnk{color:var(--hd);font-size:13px;text-align:center}#err{color:#d33;font-size:13px;min-height:16px}
-#app{height:100%;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:380px 1fr;background:#fff}
-aside,main{display:flex;flex-direction:column;min-height:0;height:100%}
-aside{border-right:1px solid var(--bd);position:relative}
-.top{background:var(--hd);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px;min-height:56px}
-.top b{flex:1;font-size:19px}.top .sub{font-size:12px;opacity:.8;display:block;font-weight:400}.top .t{flex:1;line-height:1.2}
-.ib{color:#fff;font-size:20px;width:36px;height:36px}
-#list,#msgs{flex:1;overflow-y:auto}
-.item{display:flex;gap:12px;padding:10px 14px;cursor:pointer;align-items:center}.item:hover{background:#f5f6f6}
-.item .c{flex:1;min-width:0;border-bottom:1px solid var(--bd);padding-bottom:10px}
-.item .r1{display:flex;justify-content:space-between}.item .r1 span{font-size:12px;color:var(--mu)}
-.item .pv{color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
-.av{width:46px;height:46px;border-radius:50%;background:#b4bcc2;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;overflow:hidden;flex:none}
-.av.s{width:38px;height:38px}.av.l{width:110px;height:110px;font-size:40px}.av img{width:100%;height:100%;object-fit:cover}
-.fab{position:absolute;right:18px;bottom:18px;width:56px;height:56px;border-radius:16px;background:var(--ac);color:#fff;font-size:24px;box-shadow:0 3px 8px #0004}
-main{background:var(--bg)}
-#msgs{padding:10px 8%;display:flex;flex-direction:column;gap:4px}
-.day{align-self:center;background:#fff;color:var(--mu);font-size:12px;padding:4px 10px;border-radius:8px;margin:8px 0;text-transform:uppercase}
-.row{display:flex}.row.out{justify-content:flex-end}
-.bub{max-width:78%;background:#fff;border-radius:8px;padding:6px 8px 4px;box-shadow:0 1px 1px #0002;white-space:pre-wrap;word-break:break-word}
-.out .bub{background:var(--out)}.nm{font-size:13px;font-weight:600}
-.tm{font-size:11px;color:var(--mu);float:right;margin:6px 0 0 10px}
-.bub video,.bub img.p{max-width:100%;max-height:320px;border-radius:6px;display:block;margin-bottom:3px}.bub video{width:300px}.bub audio{width:240px;display:block}
-.bar{display:flex;gap:8px;padding:8px;align-items:center;background:#f0f2f5;position:relative}
-.bar .in{flex:1;border-radius:22px;border:0}
-.go{width:44px;height:44px;border-radius:50%;background:var(--ac);color:#fff;font-size:18px}.go.rec{background:#d33}
-#chip{background:#f0f2f5;padding:4px 14px;font-size:13px;color:var(--mu)}
-#menu{position:absolute;bottom:62px;left:10px;right:10px;background:#fff;border-radius:16px;padding:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;box-shadow:0 4px 14px #0003;text-align:center;font-size:12px;z-index:5}
-#menu button{display:flex;flex-direction:column;align-items:center;gap:6px}
-#menu i{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;color:#fff}
-.empty{margin:auto;color:var(--mu);text-align:center}
-.sheet{position:fixed;inset:0;background:#0006;display:flex;align-items:flex-end;justify-content:center;z-index:9}
-.sheet>div{background:#fff;width:100%;max-width:460px;max-height:85%;border-radius:16px 16px 0 0;display:flex;flex-direction:column;gap:8px;padding:14px}
-.sheet .lst{overflow-y:auto;flex:1}.sheet .item{padding:6px 4px}
-.sheet .ck{width:22px;height:22px;border-radius:50%;border:2px solid #b4bcc2;flex:none}.item.on .ck{background:var(--ac);border-color:var(--ac)}
-@media(max-width:800px){#app{grid-template-columns:1fr}#app:not(.chat) main,#app.chat aside{display:none}#msgs{padding:10px 10px}.back{display:block!important}}
-.back{display:none}.bd{background:var(--ac);color:#fff;border-radius:12px;min-width:20px;padding:0 6px;font-size:12px;text-align:center;line-height:20px;margin-left:6px}.tk{color:#8696a0;font-size:12px;margin-left:3px}.tk.rd{color:#34b7f1}#hdr{cursor:pointer}.item .r2{display:flex;justify-content:space-between;align-items:center}.item .r2 .pv{flex:1;min-width:0}
-</style></head><body>
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>WhatsApp Web - Mensajería Instantánea</title>
 
-<div id="auth" class="hide">
- <img src="logo.png" alt="" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #fff"><h1>Grussap</h1>
- <div class="box">
-  <input id="u" class="in" placeholder="Usuario" autocomplete="username" maxlength="20">
-  <input id="p" class="in" type="password" placeholder="Contraseña (mín. 6)" autocomplete="current-password">
-  <div id="err"></div>
-  <button class="btn" id="bgo">Entrar</button>
-  <button class="lnk" id="bsw">¿No tienes cuenta? Regístrate</button>
- </div>
-</div>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
-<div id="app" class="hide">
- <aside>
-  <div class="top"><img src="logo.png" alt="" class="av s" style="object-fit:cover"><b>Grussap</b><button class="ib" id="bprof" title="Mi perfil">👤</button></div>
-  <div id="list"></div>
-  <button class="fab" id="fab" title="Nuevo chat o grupo">✎</button>
- </aside>
- <main>
-  <div class="empty" id="none">Selecciona un chat o crea uno nuevo</div>
-  <div id="pane" class="hide" style="display:flex;flex-direction:column;height:100%">
-   <div class="top"><button class="ib back" id="bk">←</button><div id="hav"></div><div class="t" id="hdr"><div id="hn"></div><span class="sub" id="hs"></span></div></div>
-   <div id="msgs"></div>
-   <div id="chip" class="hide"></div>
-   <div class="bar">
-    <div id="menu" class="hide">
-     <button data-a="*/*"><i style="background:#7c5cf0">📄</i>Documento</button>
-     <button data-a="image/*" data-c="1"><i style="background:#e8336d">📷</i>Cámara</button>
-     <button data-a="image/*,video/*"><i style="background:#a14bd8">🖼️</i>Galería</button>
-     <button data-a="audio/*"><i style="background:#f06a2a">🎧</i>Audio</button>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Segoe UI', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+          },
+          colors: {
+            wa: {
+              header: '#075E54',
+              teal: '#128C7E',
+              green: '#25D366',
+              lightGreen: '#DCF8C6',
+              bgBeige: '#E5DDD5',
+              darkBg: '#111b21',
+              darkSidebar: '#111b21',
+              darkHeader: '#202c33',
+              darkBubbleIn: '#202c33',
+              darkBubbleOut: '#005c4b',
+              blueCheck: '#34B7F1',
+              pillBlue: '#00A884',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+
+    /* WhatsApp Subtle Wallpaper Background Pattern */
+    .wa-chat-bg {
+      background-color: #E5DDD5;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px), radial-gradient(#cbd5e1 1px, #E5DDD5 1px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+    }
+
+    /* Message Tail Outgoing */
+    .tail-out::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: -8px;
+      width: 0;
+      height: 0;
+      border-top: 10px solid #DCF8C6;
+      border-right: 10px solid transparent;
+    }
+
+    /* Message Tail Incoming */
+    .tail-in::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -8px;
+      width: 0;
+      height: 0;
+      border-top: 10px solid #FFFFFF;
+      border-left: 10px solid transparent;
+    }
+
+    .pulse-record {
+      animation: pulse-red 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-900 text-slate-100 font-sans flex flex-col overflow-hidden select-none">
+
+  <div id="authModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white text-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-wa-header p-6 text-white text-center relative">
+        <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 text-wa-green text-3xl">
+          <i class="fa-brands fa-whatsapp"></i>
+        </div>
+        <h2 class="text-2xl font-bold">Bienvenido a WhatsApp</h2>
+        <p class="text-xs text-emerald-100 mt-1">Ingresa o regístrate en un solo paso</p>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="authForm" onsubmit="handleAuthSubmit(event)" class="p-6 space-y-4">
+        
+        <!-- Avatar Selector -->
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 text-center">Foto de Perfil</label>
+          <div class="flex items-center justify-center gap-4">
+            <div class="relative group cursor-pointer" onclick="document.getElementById('avatarFileInput').click()">
+              <img id="authAvatarPreview" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Maria" alt="Avatar" class="w-20 h-20 rounded-full border-2 border-wa-teal object-cover bg-slate-100">
+              <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition">
+                <i class="fa-solid fa-camera text-xl"></i>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-center gap-2 mt-3">
+            <button type="button" onclick="setPresetAvatar('Carlos')" class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-full text-slate-700">Carlos</button>
+            <button type="button" onclick="setPresetAvatar('Maria')" class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-full text-slate-700">María</button>
+            <button type="button" onclick="setPresetAvatar('Juan')" class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-full text-slate-700">Juan</button>
+            <button type="button" onclick="setPresetAvatar('Ana')" class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-full text-slate-700">Ana</button>
+          </div>
+          <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="handleAvatarFileSelect(event)">
+        </div>
+
+        <!-- Username -->
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Nombre de Usuario</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400"></i>
+            <input type="text" id="authUsername" required placeholder="Ej: Carlos_Dev" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-wa-teal">
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Contraseña</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400"></i>
+            <input type="password" id="authPassword" required placeholder="••••••••" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-wa-teal">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="w-full bg-wa-teal hover:bg-wa-header text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+          <span>Ingresar al Chat</span>
+          <i class="fa-solid fa-arrow-right text-sm"></i>
+        </button>
+
+        <p class="text-[11px] text-slate-400 text-center mt-2">No requiere captchas ni verificaciones complejas.</p>
+      </form>
     </div>
-    <button class="ib" style="color:#667781" id="bat">📎</button>
-    <input id="t" class="in" placeholder="Escribe un mensaje" autocomplete="off">
-    <button class="go" id="go">🎤</button>
-    <input type="file" id="fi" class="hide">
-   </div>
   </div>
- </main>
-</div>
-<div id="sheet" class="sheet hide"><div id="sb"></div></div>
 
-<script>
-// ====== CONFIGURA ESTO (Supabase > Project Settings > API) ======
-const SUPABASE_URL='https://vyuitthwzydzbuwdftjt.supabase.co/rest/v1/', SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dWl0dGh3enlkemJ1d2RmdGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMTc5MDAsImV4cCI6MjEwNjc5MzkwMH0.VSsR0IumZn668E4xWj7Al-bgexob9OOW8pXWfVBX7VU';
-// ================================================================
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const $=s=>document.querySelector(s);
-const h=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
-let me=null,P={},chats=[],msgs={},cur=null,file=null,reg=false,rec=null,typing={},ch=null,lastTyp=0;
-const COL=['#c0392b','#8e44ad','#2980b9','#16a085','#d35400','#c2185b','#558b2f'];
-const color=id=>COL[[...id].reduce((a,c)=>a+c.charCodeAt(0),0)%COL.length];
-const hm=d=>new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  <div id="createGroupModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white text-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-200">
+      <div class="bg-wa-header p-4 text-white flex justify-between items-center">
+        <h3 class="font-bold text-lg"><i class="fa-solid fa-users mr-2"></i>Crear Nuevo Grupo</h3>
+        <button onclick="closeGroupModal()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <form onsubmit="handleCreateGroup(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre del Grupo</label>
+          <input type="text" id="groupNameInput" required placeholder="Ej. Equipo de Proyecto" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-wa-teal">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descripción corta</label>
+          <input type="text" id="groupDescInput" placeholder="Ej. Grupo oficial para tareas y chats" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-wa-teal">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Icono del Grupo</label>
+          <div class="flex gap-2">
+            <button type="button" onclick="setGroupPresetIcon('🚀')" class="text-xl p-2 bg-slate-100 rounded-lg hover:bg-slate-200">🚀</button>
+            <button type="button" onclick="setGroupPresetIcon('⚽')" class="text-xl p-2 bg-slate-100 rounded-lg hover:bg-slate-200">⚽</button>
+            <button type="button" onclick="setGroupPresetIcon('🎮')" class="text-xl p-2 bg-slate-100 rounded-lg hover:bg-slate-200">🎮</button>
+            <button type="button" onclick="setGroupPresetIcon('📚')" class="text-xl p-2 bg-slate-100 rounded-lg hover:bg-slate-200">📚</button>
+            <button type="button" onclick="setGroupPresetIcon('☕')" class="text-xl p-2 bg-slate-100 rounded-lg hover:bg-slate-200">☕</button>
+          </div>
+          <input type="hidden" id="groupIconSelected" value="🚀">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeGroupModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="px-5 py-2 bg-wa-teal hover:bg-wa-header text-white rounded-xl text-xs font-bold shadow">Crear Grupo</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-/* ---------- Auth ---------- */
-$('#bsw').onclick=()=>{reg=!reg;$('#bgo').textContent=reg?'Crear cuenta':'Entrar';$('#bsw').textContent=reg?'Ya tengo cuenta':'¿No tienes cuenta? Regístrate';$('#err').textContent=''};
-$('#p').onkeydown=e=>e.key==='Enter'&&$('#bgo').click();
-$('#bgo').onclick=async()=>{
- const u=$('#u').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,''),p=$('#p').value;
- if(u.length<3||p.length<6)return $('#err').textContent='Usuario ≥3 (letras/números/_) y contraseña ≥6';
- const email=u+'@wachat.app';
- const r=reg?await sb.auth.signUp({email,password:p,options:{data:{username:u}}}):await sb.auth.signInWithPassword({email,password:p});
- if(r.error)return $('#err').textContent=r.error.message;
- boot();
-};
-async function boot(){
- const {data:{session}}=await sb.auth.getSession();
- if(!session){$('#auth').classList.remove('hide');$('#app').classList.add('hide');return}
- me=session.user.id;$('#auth').classList.add('hide');$('#app').classList.remove('hide');
- await loadProfiles();await loadChats();subscribe();
-}
-async function loadProfiles(){const {data}=await sb.from('profiles').select('*');P={};(data||[]).forEach(x=>P[x.id]=x)}
-async function loadChats(){
- const {data}=await sb.from('chats').select('*,members(user_id,last_read)');chats=data||[];
- const {data:m}=await sb.from('messages').select('*').order('created_at',{ascending:false}).limit(400);
- msgs={};(m||[]).reverse().forEach(x=>(msgs[x.chat_id]??=[]).push(x));
- renderList();cur&&renderChat();
-}
-function subscribe(){
- ch=sb.channel('all');
- ch.on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},p=>{
-  const m=p.new,a=(msgs[m.chat_id]??=[]);if(a.some(x=>x.id===m.id))return;a.push(m);
-  if(!chats.some(c=>c.id===m.chat_id))return loadChats();
-  renderList();cur===m.chat_id&&renderChat()})
- .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages'},p=>{
-  for(const k in msgs)msgs[k]=msgs[k].filter(x=>x.id!==p.old.id);renderList();cur&&renderChat()})
- .on('postgres_changes',{event:'*',schema:'public',table:'members'},p=>{
-  if(p.eventType==='UPDATE'){const c=chats.find(x=>x.id===p.new.chat_id),mm=c&&c.members.find(x=>x.user_id===p.new.user_id);
-   if(mm){mm.last_read=p.new.last_read;renderList();cur===c.id&&renderChat()}}
-  else loadChats()})
- .on('postgres_changes',{event:'UPDATE',schema:'public',table:'chats'},()=>loadChats())
- .on('postgres_changes',{event:'*',schema:'public',table:'profiles'},()=>loadProfiles().then(()=>{renderList();cur&&renderChat()}))
- .on('broadcast',{event:'typing'},({payload:p})=>{
-  if(p.user===me)return;typing[p.chat]=[p.user,Date.now()];setSub();renderList();setTimeout(()=>{setSub();renderList()},3100)})
- .subscribe();
-}
+  <div id="firebaseModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 text-slate-100 rounded-2xl w-full max-w-lg shadow-2xl p-6">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-lg text-emerald-400"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Sincronización GitHub Pages</h3>
+        <button onclick="closeFirebaseModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Esta app funciona inmediatamente en local y entre pestañas usando <strong>BroadcastChannel</strong>. Si quieres sincronizar chats en vivo entre distintos dispositivos alojados en <strong>GitHub Pages</strong>, puedes pegar tu JSON de configuración de Firebase a continuación:
+      </p>
+      <textarea id="firebaseConfigInput" rows="5" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", ...}' class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-emerald-300 focus:outline-none focus:border-emerald-500 mb-4"></textarea>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeFirebaseModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Cerrar</button>
+        <button onclick="saveFirebaseConfig()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold">Guardar y Conectar</button>
+      </div>
+    </div>
+  </div>
 
-/* ---------- Lista de chats ---------- */
-function other(c){return P[(c.members.find(m=>m.user_id!==me)||{}).user_id]||{}}
-const cname=c=>c.is_group?c.name:(other(c).username||'?');
-function av(cls,url,name,grp){const d=h('div','av '+cls);if(url){const i=h('img');i.src=url;d.append(i)}else d.textContent=grp?'👥':(name||'?')[0].toUpperCase();return d}
-function pv(m){if(!m)return'';const w=m.user_id===me?'Tú: ':'';const t=m.media_type||'';return w+(m.text||(t.startsWith('video')?'🎥 Vídeo':t.startsWith('audio')?'🎧 Audio':t.startsWith('image')?'📷 Foto':'📄 Archivo'))}
-function renderList(){
- const L=$('#list');L.textContent='';
- const last=c=>(msgs[c.id]||[]).slice(-1)[0];
- [...chats].sort((a,b)=>new Date((last(b)||b).created_at)-new Date((last(a)||a).created_at)).forEach(c=>{
-  const l=last(c),it=h('div','item'),bx=h('div','c'),r=h('div','r1'),r2=h('div','r2');
-  const mm=c.members.find(x=>x.user_id===me)||{},t=typing[c.id],ty=t&&Date.now()-t[1]<3000;
-  const un=(msgs[c.id]||[]).filter(x=>x.user_id!==me&&new Date(x.created_at)>new Date(mm.last_read||0)).length;
-  const pe=h('div','pv',ty?'escribiendo…':pv(l));if(ty)pe.style.color='var(--ac)';
-  r.append(h('b','',cname(c)),h('span','',l?hm(l.created_at):''));r2.append(pe);if(un&&cur!==c.id)r2.append(h('span','bd',un));
-  bx.append(r,r2);it.append(av('',c.is_group?null:other(c).avatar,cname(c),c.is_group),bx);it.onclick=()=>open(c.id);L.append(it)});
- if(!chats.length)L.append(h('div','empty','Aún no tienes chats.\nPulsa ✎ para empezar.'));
-}
+  <div class="flex-1 flex overflow-hidden relative">
 
-/* ---------- Chat ---------- */
-function open(id){
- cur=id;const c=chats.find(x=>x.id===id);
- $('#none').classList.add('hide');$('#pane').classList.remove('hide');$('#app').classList.add('chat');
- const hv=$('#hav');hv.textContent='';hv.append(av('s',c.is_group?null:other(c).avatar,cname(c),c.is_group));
- $('#hn').textContent=cname(c);
- setSub();
- renderChat();
-}
-$('#bk').onclick=()=>{cur=null;$('#app').classList.remove('chat')};
-function renderChat(){
- const b=$('#msgs'),c=chats.find(x=>x.id===cur);if(!c)return;
- const end=b.scrollHeight-b.scrollTop-b.clientHeight<120||!b.childElementCount;b.textContent='';let day='';
- (msgs[cur]||[]).forEach(m=>{
-  const d=new Date(m.created_at).toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
-  if(d!==day){b.append(h('div','day',d));day=d}
-  const mine=m.user_id===me,row=h('div','row '+(mine?'out':'in')),bb=h('div','bub');
-  if(!mine&&c.is_group){const n=h('div','nm',(P[m.user_id]||{}).username||'?');n.style.color=color(m.user_id);bb.append(n)}
-  if(m.media_url){const t=m.media_type||'';let e;
-   if(t.startsWith('video')){e=h('video');e.controls=true;e.playsInline=true;e.preload='metadata'}
-   else if(t.startsWith('audio')){e=h('audio');e.controls=true;e.preload='metadata'}
-   else if(t.startsWith('image')){e=h('img','p')}
-   else{e=h('a','','📄 Abrir archivo');e.target='_blank'}
-   e[e.tagName==='A'?'href':'src']=m.media_url;bb.append(e)}
-  if(m.text)bb.append(h('span','',m.text));
-  const tm=h('span','tm',hm(m.created_at));
-  if(mine){const o=c.members.filter(x=>x.user_id!==me),rd=o.length&&o.every(x=>new Date(x.last_read||0)>=new Date(m.created_at));
-   tm.append(h('span','tk'+(rd?' rd':''),rd?'✓✓':'✓'));
-   bb.oncontextmenu=bb.ondblclick=e=>{e.preventDefault();if(confirm('¿Eliminar este mensaje para todos?'))sb.from('messages').delete().eq('id',m.id).then(({error})=>{if(error)return alert(error.message);msgs[cur]=msgs[cur].filter(x=>x.id!==m.id);renderList();renderChat()})}}
-  bb.append(tm);row.append(bb);b.append(row)});
- if(end)b.scrollTop=b.scrollHeight;
- markRead();
-}
-async function markRead(){
- const a=msgs[cur]||[],c=chats.find(x=>x.id===cur);if(!c||!a.length||document.hidden)return;
- const mm=c.members.find(x=>x.user_id===me),t=a[a.length-1].created_at;
- if(!mm||new Date(mm.last_read||0)>=new Date(t))return;
- mm.last_read=t;renderList();
- await sb.from('members').update({last_read:t}).eq('chat_id',cur).eq('user_id',me);
-}
-document.addEventListener('visibilitychange',()=>!document.hidden&&markRead());
-function setSub(){
- const c=chats.find(x=>x.id===cur);if(!c)return;const t=typing[cur];
- $('#hs').textContent=t&&Date.now()-t[1]<3000?(c.is_group?((P[t[0]]||{}).username||'')+' está escribiendo…':'escribiendo…')
-  :(c.is_group?c.members.map(m=>m.user_id===me?'Tú':(P[m.user_id]||{}).username).join(', '):'');
-}
+    <!-- SIDEBAR (CHATS LIST & TOP TEAL TABS) -->
+    <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-wa-darkSidebar border-r border-slate-800 flex flex-col h-full z-20 transition-transform duration-300">
+      
+      <!-- Top Primary Header -->
+      <header class="bg-wa-header text-white p-3 flex items-center justify-between shadow-md">
+        <div class="flex items-center gap-3">
+          <img id="currentUserAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" alt="Perfil" class="w-10 h-10 rounded-full object-cover border border-white/20 cursor-pointer" onclick="openAuthModal()" title="Cambiar usuario">
+          <span id="currentUsernameDisplay" class="font-bold text-sm tracking-wide truncate max-w-[120px]">Invitado</span>
+        </div>
 
-/* ---------- Enviar / adjuntar / grabar ---------- */
-async function send(text,f){
- let media_url=null,media_type=null;
- if(f){const path=me+'/'+Date.now()+'_'+f.name.replace(/[^\w.]/g,'_');
-  const up=await sb.storage.from('media').upload(path,f,{contentType:f.type||'application/octet-stream'});
-  if(up.error)return alert('Error al subir: '+up.error.message);
-  media_url=sb.storage.from('media').getPublicUrl(path).data.publicUrl;media_type=f.type}
- const {error}=await sb.from('messages').insert({chat_id:cur,user_id:me,text:text||null,media_url,media_type});
- if(error)alert(error.message);
-}
-const upd=()=>{$('#go').textContent=($('#t').value.trim()||file)?'➤':'🎤'};
-$('#t').oninput=()=>{upd();if(cur&&ch&&Date.now()-lastTyp>2000){lastTyp=Date.now();ch.send({type:'broadcast',event:'typing',payload:{chat:cur,user:me}})}};$('#t').onkeydown=e=>e.key==='Enter'&&$('#go').click();
-$('#bat').onclick=()=>$('#menu').classList.toggle('hide');
-$('#menu').onclick=e=>{const b=e.target.closest('button');if(!b)return;
- const f=$('#fi');f.accept=b.dataset.a;b.dataset.c?f.setAttribute('capture','environment'):f.removeAttribute('capture');f.value='';f.click();$('#menu').classList.add('hide')};
-$('#fi').onchange=e=>{file=e.target.files[0]||null;const c=$('#chip');c.classList.toggle('hide',!file);c.textContent=file?'📎 '+file.name+'  (se enviará con el mensaje)':'';upd()};
-$('#go').onclick=async()=>{
- const t=$('#t').value.trim();
- if(rec)return rec.stop();
- if(t||file){const f=file;$('#t').value='';file=null;$('#chip').classList.add('hide');upd();return send(t,f)}
- try{const s=await navigator.mediaDevices.getUserMedia({audio:true}),r=new MediaRecorder(s),ch=[];rec=r;
-  r.ondataavailable=e=>ch.push(e.data);
-  r.onstop=()=>{s.getTracks().forEach(x=>x.stop());rec=null;$('#go').classList.remove('rec');$('#go').textContent='🎤';
-   const ty=(r.mimeType||'audio/webm').split(';')[0];send('',new File(ch,'voz.'+(ty.includes('mp4')?'m4a':'webm'),{type:ty}))};
-  r.start();$('#go').classList.add('rec');$('#go').textContent='⏹'}
- catch(e){alert('No se pudo acceder al micrófono')}
-};
+        <div class="flex items-center gap-4 text-white/90">
+          <button onclick="openGroupModal()" title="Nuevo Grupo" class="hover:text-white text-lg"><i class="fa-solid fa-users-plus"></i></button>
+          <button onclick="openFirebaseModal()" title="Configuración Nube / GitHub Pages" class="hover:text-white text-lg"><i class="fa-solid fa-cloud"></i></button>
+          <button onclick="openAuthModal()" title="Cerrar / Cambiar Cuenta" class="hover:text-rose-300 text-lg"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+      </header>
 
-/* ---------- Hojas: nuevo chat/grupo y perfil ---------- */
-function sheet(f){const s=$('#sb');s.textContent='';s.style.alignItems='';f(s);$('#sheet').classList.remove('hide')}
-$('#sheet').onclick=e=>{if(e.target.id==='sheet')e.target.classList.add('hide')};
-const closeSheet=()=>$('#sheet').classList.add('hide');
-function picker(s,title,cands,btn,withName,onOk){
- const sel=new Set();s.append(h('b','',title));
- const q=h('input','in');q.placeholder='Buscar usuario…';const L=h('div','lst'),g=h('input','in hide');g.placeholder='Nombre del grupo';
- const ok=h('button','btn',btn);
- const draw=()=>{L.textContent='';cands.filter(u=>u.username.includes(q.value.toLowerCase())).forEach(u=>{
-  const it=h('div','item'+(sel.has(u.id)?' on':'')),n=h('div','c',u.username);n.style.border=0;it.append(av('s',u.avatar,u.username),n,h('div','ck'));
-  it.onclick=()=>{sel.has(u.id)?sel.delete(u.id):sel.add(u.id);withName&&g.classList.toggle('hide',sel.size<2);draw()};L.append(it)})};
- q.oninput=draw;draw();s.append(q,L,g,ok);
- ok.onclick=()=>sel.size&&onOk([...sel],g.value.trim());
-}
-$('#fab').onclick=()=>sheet(s=>picker(s,'Nuevo chat o grupo',Object.values(P).filter(u=>u.id!==me),'Crear',true,async(ids,name)=>{
- const ex=ids.length===1&&chats.find(c=>!c.is_group&&c.members.some(m=>m.user_id===ids[0]));
- if(ex){closeSheet();return open(ex.id)}
- const {data,error}=await sb.rpc('create_chat',{p_name:ids.length>1?(name||'Grupo'):null,p_is_group:ids.length>1,p_members:ids});
- if(error)return alert(error.message);
- closeSheet();await loadChats();open(data)}));
-$('#hdr').onclick=()=>{const c=chats.find(x=>x.id===cur);if(c&&c.is_group)sheet(s=>{
- const a=av('l',null,c.name,true);a.style.alignSelf='center';
- const nm=h('input','in');nm.value=c.name;const sv=h('button','btn','Guardar nombre');
- sv.onclick=async()=>{const {error}=await sb.from('chats').update({name:nm.value.trim()||c.name}).eq('id',cur);if(error)return alert(error.message);closeSheet();loadChats().then(()=>open(cur))};
- const L=h('div','lst');c.members.forEach(m=>{const u=P[m.user_id]||{username:'?'},it=h('div','item'),n=h('div','c',u.username+(m.user_id===me?' (tú)':''));n.style.border=0;it.append(av('s',u.avatar,u.username),n);L.append(it)});
- const ad=h('button','btn','Añadir miembros'),lv=h('button','lnk','Salir del grupo');lv.style.color='#d33';
- s.append(a,nm,sv,h('b','',c.members.length+' miembros'),L,ad,lv);
- ad.onclick=()=>sheet(s2=>{const have=new Set(c.members.map(m=>m.user_id));
-  picker(s2,'Añadir a '+c.name,Object.values(P).filter(u=>!have.has(u.id)),'Añadir',false,async ids=>{
-   const {error}=await sb.rpc('add_members',{p_chat:cur,p_members:ids});if(error)return alert(error.message);closeSheet();loadChats()})});
- lv.onclick=async()=>{if(!confirm('¿Salir del grupo?'))return;
-  const {error}=await sb.from('members').delete().eq('chat_id',cur).eq('user_id',me);if(error)return alert(error.message);
-  closeSheet();cur=null;$('#pane').classList.add('hide');$('#none').classList.remove('hide');$('#app').classList.remove('chat');loadChats()}})};
-$('#bprof').onclick=()=>sheet(s=>{
- const u=P[me]||{username:'?'};s.style.alignItems='center';
- const a=av('l',u.avatar,u.username);const fi=h('input');fi.type='file';fi.accept='image/*';fi.className='hide';
- const b1=h('button','btn','Cambiar foto de perfil'),b2=h('button','lnk','Cerrar sesión');
- s.append(a,h('b','',u.username),b1,fi,b2);
- b1.onclick=()=>fi.click();
- fi.onchange=()=>{const f=fi.files[0];if(!f)return;const im=new Image();im.onload=async()=>{
-  const c=document.createElement('canvas');c.width=c.height=256;const z=Math.min(im.width,im.height);
-  c.getContext('2d').drawImage(im,(im.width-z)/2,(im.height-z)/2,z,z,0,0,256,256);
-  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.85)),path=me+'/avatar_'+Date.now()+'.jpg';
-  const up=await sb.storage.from('media').upload(path,blob,{contentType:'image/jpeg'});if(up.error)return alert(up.error.message);
-  const url=sb.storage.from('media').getPublicUrl(path).data.publicUrl;
-  await sb.from('profiles').update({avatar:url}).eq('id',me);$('#sheet').classList.add('hide')};im.src=URL.createObjectURL(f)};
- b2.onclick=async()=>{await sb.auth.signOut();location.reload()}});
+      <!-- Sub Header Navigation Tabs (Matching WhatsApp Reference Image 2) -->
+      <nav class="bg-wa-teal text-white/80 flex text-xs font-bold uppercase tracking-wider text-center border-b border-wa-header/40 shadow-sm">
+        <button class="w-10 py-2.5 text-white/90 text-sm border-b-2 border-white"><i class="fa-solid fa-camera"></i></button>
+        <button class="flex-1 py-2.5 text-white border-b-2 border-white">CHATS <span id="chatsBadge" class="bg-white text-wa-teal px-1.5 py-0.5 rounded-full text-[10px] ml-1 font-extrabold">3</span></button>
+        <button class="flex-1 py-2.5 hover:text-white">ESTADOS</button>
+        <button class="flex-1 py-2.5 hover:text-white">LLAMADAS</button>
+      </nav>
 
-boot();
-</script></body></html>
+      <!-- Search Input -->
+      <div class="p-2 bg-slate-950/60 border-b border-slate-800">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+          <input type="text" id="chatSearchInput" onkeyup="filterChatsList()" placeholder="Buscar o empezar un nuevo chat..." class="w-full bg-slate-900 text-slate-200 placeholder-slate-500 pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-800 focus:outline-none focus:border-wa-teal">
+        </div>
+      </div>
+
+      <!-- Chats List Scrollable -->
+      <div id="chatsListContainer" class="flex-1 overflow-y-auto divide-y divide-slate-800/40">
+        <!-- Dynamic chat items will render here -->
+      </div>
+    </aside>
+
+    <!-- MAIN CHAT CONVERSATION WINDOW -->
+    <main id="chatWindow" class="flex-1 flex flex-col h-full bg-slate-950 relative w-full md:w-auto">
+      
+      <!-- Active Chat Header (Teal WhatsApp Header) -->
+      <header id="activeChatHeader" class="bg-wa-header text-white p-2.5 sm:p-3 flex items-center justify-between shadow-md z-10">
+        <div class="flex items-center gap-3">
+          <!-- Back button on mobile -->
+          <button onclick="showSidebarOnMobile()" class="md:hidden text-white/90 hover:text-white text-lg pr-1">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          
+          <div class="relative">
+            <img id="activeChatAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Adam" alt="Chat" class="w-10 h-10 rounded-full object-cover border border-white/20 bg-slate-800">
+            <span id="activeChatOnlineBadge" class="w-3 h-3 bg-emerald-400 border-2 border-wa-header rounded-full absolute bottom-0 right-0"></span>
+          </div>
+
+          <div>
+            <h2 id="activeChatTitle" class="font-semibold text-sm sm:text-base leading-tight">Adam</h2>
+            <p id="activeChatSubtitle" class="text-[11px] text-emerald-200">en línea</p>
+          </div>
+        </div>
+
+        <!-- Action Icons -->
+        <div class="flex items-center gap-4 text-white/90 text-base pr-2">
+          <button onclick="showToast('Iniciando videollamada...', 'info')" title="Videollamada"><i class="fa-solid fa-video"></i></button>
+          <button onclick="showToast('Iniciando llamada de voz...', 'info')" title="Llamada"><i class="fa-solid fa-phone"></i></button>
+          <button onclick="showToast('Opciones del chat', 'info')" title="Más opciones"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+      </header>
+
+      <section id="chatFeed" class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 wa-chat-bg relative">
+        
+        <!-- Date Divider Badge -->
+        <div class="text-center my-2">
+          <span class="bg-sky-500/90 text-white text-[11px] font-bold px-3 py-1 rounded-md shadow uppercase tracking-wider">
+            HOY
+          </span>
+        </div>
+
+        <div id="messagesContainer" class="space-y-3 max-w-4xl mx-auto">
+          <!-- Dynamic Message Bubbles rendered here -->
+        </div>
+      </section>
+
+      <div id="attachmentPopup" class="hidden absolute bottom-16 left-4 sm:left-8 bg-white/95 backdrop-blur-md border border-slate-200 rounded-3xl p-5 shadow-2xl z-30 animate-fade-in w-72">
+        <div class="grid grid-cols-3 gap-4 text-center">
+          
+          <!-- Documento -->
+          <button onclick="triggerFilePicker('document')" class="flex flex-col items-center gap-1.5 group">
+            <div class="w-12 h-12 bg-purple-600 group-hover:bg-purple-700 text-white rounded-full flex items-center justify-center text-xl shadow-lg transition">
+              <i class="fa-solid fa-file-lines"></i>
+            </div>
+            <span class="text-[11px] font-medium text-slate-700">Documento</span>
+          </button>
+
+          <!-- Cámara -->
+          <button onclick="triggerFilePicker('image')" class="flex flex-col items-center gap-1.5 group">
+            <div class="w-12 h-12 bg-rose-500 group-hover:bg-rose-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg transition">
+              <i class="fa-solid fa-camera"></i>
+            </div>
+            <span class="text-[11px] font-medium text-slate-700">Cámara</span>
+          </button>
+
+          <!-- Galería / Video -->
+          <button onclick="triggerFilePicker('video')" class="flex flex-col items-center gap-1.5 group">
+            <div class="w-12 h-12 bg-purple-500 group-hover:bg-purple-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg transition">
+              <i class="fa-solid fa-photo-film"></i>
+            </div>
+            <span class="text-[11px] font-medium text-slate-700">Galería</span>
+          </button>
+
+          <!-- Audio -->
+          <button onclick="triggerFilePicker('audio')" class="flex flex-col items-center gap-1.5 group">
+            <div class="w-12 h-12 bg-amber-500 group-hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg transition">
+              <i class="fa-solid fa-headphones"></i>
+            </div>
+            <span class="text-[11px] font-medium text-slate-700">Audio</span>
+          </button>
+
+          <!-- Ubicación -->
+          <button onclick="sendLocationMessage()" class="flex flex-col items-center gap-1.5 group">
+            <div class="w-12 h-12 bg-emerald-500 group-hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg transition">
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <span class="text-[11px] font-medium text-slate-700">Ubicación</span>
+          </button>
+
+          <!-- Contacto -->
+          <button onclick="sendContactMessage()" class="flex flex-col items-center gap-1.5 group">
+            <div class="w-12 h-12 bg-blue-500 group-hover:bg-blue-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg transition">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <span class="text-[11px] font-medium text-slate-700">Contacto</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden generic file input -->
+      <input type="file" id="genericFileInput" class="hidden" onchange="handleFileSelected(event)">
+
+      <!-- Pending Attachment Drawer Preview -->
+      <div id="attachmentDrawer" class="hidden bg-slate-800 border-t border-slate-700 p-2.5 px-4 flex items-center justify-between z-20">
+        <div class="flex items-center gap-3">
+          <div id="drawerIcon" class="w-9 h-9 bg-wa-teal rounded-lg flex items-center justify-center text-white text-base">
+            <i class="fa-solid fa-paperclip"></i>
+          </div>
+          <div>
+            <p id="drawerFileName" class="text-xs font-semibold text-white truncate max-w-xs">archivo.mp4</p>
+            <p id="drawerFileType" class="text-[10px] text-emerald-400">Listo para enviar</p>
+          </div>
+        </div>
+        <button onclick="clearAttachment()" class="text-slate-400 hover:text-rose-400 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <!-- Audio Recording Banner Panel -->
+      <div id="audioRecordingPanel" class="hidden bg-rose-950/90 border-t border-rose-800 p-2.5 px-4 flex items-center justify-between z-20">
+        <div class="flex items-center gap-3">
+          <span class="w-3.5 h-3.5 bg-rose-500 rounded-full pulse-record"></span>
+          <span class="text-xs font-bold text-rose-200">Grabando Nota de Voz...</span>
+          <span id="recordingTimer" class="font-mono text-xs bg-rose-900 text-rose-100 px-2 py-0.5 rounded">00:00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="cancelVoiceRecording()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">Cancelar</button>
+          <button onclick="stopAndSendVoiceRecording()" class="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
+            <i class="fa-solid fa-paper-plane text-[10px]"></i> Enviar
+          </button>
+        </div>
+      </div>
+
+      <footer class="bg-slate-900 border-t border-slate-800 p-2 sm:p-3 z-10">
+        <form onsubmit="handleSendMessage(event)" class="flex items-center gap-2 max-w-4xl mx-auto">
+          
+          <!-- Emoji button -->
+          <button type="button" onclick="showToast('Menú de emojis', 'info')" class="text-slate-400 hover:text-slate-200 p-2 text-xl">
+            <i class="fa-regular fa-face-smile"></i>
+          </button>
+
+          <!-- Attachment Paperclip -->
+          <button type="button" onclick="toggleAttachmentPopup()" class="text-slate-400 hover:text-slate-200 p-2 text-xl">
+            <i class="fa-solid fa-paperclip"></i>
+          </button>
+
+          <!-- Text Input Field -->
+          <div class="flex-1 relative">
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje" class="w-full bg-slate-800 border border-slate-700 rounded-full px-4 py-2.5 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-wa-teal transition">
+          </div>
+
+          <!-- Direct Camera Attachment Button -->
+          <button type="button" onclick="triggerFilePicker('image')" class="text-slate-400 hover:text-slate-200 p-2 text-xl">
+            <i class="fa-solid fa-camera"></i>
+          </button>
+
+          <!-- Microphone / Record Audio Button -->
+          <button type="button" id="micBtn" onclick="toggleVoiceRecording()" class="w-10 h-10 bg-wa-teal hover:bg-wa-header text-white rounded-full flex items-center justify-center text-lg shadow-md transition transform active:scale-95" title="Grabar audio">
+            <i class="fa-solid fa-microphone"></i>
+          </button>
+
+          <!-- Send Button -->
+          <button type="submit" class="w-10 h-10 bg-wa-green hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-lg shadow-md transition transform active:scale-95">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'whatsapp-clone-gh-pages';
+    let db = null;
+    let auth = null;
+    let broadcastChannel = null;
+
+    let currentUser = {
+      username: 'Tú',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=TuUser'
+    };
+
+    let chats = [
+      {
+        id: 'group_general',
+        type: 'group',
+        name: 'Grupo Oficial WhatsApp',
+        avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=GrupoOficial',
+        subtitle: 'Carlos, María, Juan, Ana',
+        unread: 2,
+        messages: [
+          { sender: 'Carlos', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos', text: '¡Hola a todos! Bienvenidos al grupo.', time: '11:30', isSelf: false, type: 'text' },
+          { sender: 'María', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria', text: '¿Alguien probó el envío de audios y videos?', time: '11:32', isSelf: false, type: 'text' }
+        ]
+      },
+      {
+        id: 'user_adam',
+        type: 'direct',
+        name: 'Adam',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Adam',
+        subtitle: 'en línea',
+        unread: 0,
+        messages: [
+          { sender: 'Adam', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Adam', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', time: '08:45', isSelf: false, type: 'text' },
+          { sender: 'Adam', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Adam', text: 'Lorem ipsum dolor sit amet', time: '08:45', isSelf: false, type: 'text' },
+          { sender: 'Tú', avatar: currentUser.avatar, text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', time: '11:38', isSelf: true, type: 'text' },
+          { sender: 'Tú', avatar: currentUser.avatar, text: 'Lorem ipsum :)', time: '11:38', isSelf: true, type: 'text' }
+        ]
+      },
+      {
+        id: 'user_maria',
+        type: 'direct',
+        name: 'María García',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria',
+        subtitle: 'últ. vez hoy a las 10:15',
+        unread: 1,
+        messages: [
+          { sender: 'María García', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria', text: 'Te envié los archivos adjuntos.', time: '10:15', isSelf: false, type: 'text' }
+        ]
+      }
+    ];
+
+    let activeChatId = 'group_general';
+    let pendingAttachment = null; // { type, content, fileName }
+    
+    // Audio recording variables
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingTimer = null;
+    let recordingSeconds = 0;
+
+    // Distinct colors for group chat usernames (as in reference image 2)
+    const userColors = ['text-pink-500', 'text-purple-500', 'text-amber-500', 'text-emerald-500', 'text-sky-500', 'text-rose-500'];
+    function getUserColor(username) {
+      let hash = 0;
+      for (let i = 0; i < username.length; i++) {
+        hash = username.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return userColors[Math.abs(hash) % userColors.length];
+    }
+
+    function initSyncEngine() {
+      // Setup BroadcastChannel for multi-tab sync on GitHub Pages without server
+      if ('BroadcastChannel' in window) {
+        broadcastChannel = new BroadcastChannel('whatsapp_gh_pages_sync');
+        broadcastChannel.onmessage = (event) => {
+          if (event.data && event.data.type === 'NEW_MESSAGE') {
+            const { chatId, message } = event.data;
+            receiveIncomingMessage(chatId, message);
+          }
+        };
+      }
+
+      // Check stored custom Firebase config or default
+      const customConfig = localStorage.getItem('custom_firebase_config');
+      const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+      const configToUse = customConfig ? JSON.parse(customConfig) : envConfig;
+
+      if (configToUse) {
+        try {
+          const app = initializeApp(configToUse);
+          auth = getAuth(app);
+          db = getFirestore(app);
+
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            signInAnonymously(auth);
+          }
+
+          // Listen to global firestore messages
+          const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
+          onSnapshot(msgRef, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+              if (change.type === "added") {
+                const data = change.doc.data();
+                if (data.sender !== currentUser.username) {
+                  receiveIncomingMessage(data.chatId || 'group_general', data);
+                }
+              }
+            });
+          }, (err) => console.log("Firestore sync note:", err));
+
+        } catch (e) {
+          console.warn("Firebase fallback to local BroadcastChannel mode", e);
+        }
+      }
+    }
+
+    function renderSidebarChats() {
+      const container = document.getElementById('chatsListContainer');
+      container.innerHTML = '';
+
+      chats.forEach((chat) => {
+        const isActive = chat.id === activeChatId;
+        const lastMsg = chat.messages[chat.messages.length - 1];
+        const lastMsgText = lastMsg ? (lastMsg.type === 'audio' ? '🎵 Nota de voz' : lastMsg.type === 'video' ? '🎥 Video' : lastMsg.type === 'image' ? '📷 Foto' : lastMsg.text) : 'Sin mensajes';
+        const lastTime = lastMsg ? lastMsg.time : '';
+
+        const item = document.createElement('div');
+        item.onclick = () => selectChat(chat.id);
+        item.className = `flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-800/80 transition border-b border-slate-800/40 ${isActive ? 'bg-slate-800/90 border-l-4 border-l-wa-green' : ''}`;
+
+        item.innerHTML = `
+          <div class="relative flex-shrink-0">
+            <img src="${chat.avatar}" alt="${chat.name}" class="w-12 h-12 rounded-full object-cover bg-slate-800 border border-slate-700">
+            ${chat.type === 'direct' ? `<span class="w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full absolute bottom-0 right-0"></span>` : ''}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-0.5">
+              <h3 class="font-semibold text-sm text-slate-100 truncate">${chat.name}</h3>
+              <span class="text-[10px] text-slate-400 font-medium">${lastTime}</span>
+            </div>
+            <div class="flex justify-between items-center text-xs text-slate-400">
+              <p class="truncate text-slate-400">${lastMsgText}</p>
+              ${chat.unread > 0 ? `<span class="bg-wa-green text-slate-950 font-bold px-1.5 py-0.5 rounded-full text-[10px]">${chat.unread}</span>` : ''}
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function selectChat(chatId) {
+      activeChatId = chatId;
+      const chat = chats.find(c => c.id === chatId);
+      if (chat) chat.unread = 0;
+
+      renderSidebarChats();
+      renderActiveChat();
+
+      // Mobile Responsive view switch
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebar').classList.add('-translate-x-full', 'absolute', 'inset-0');
+      }
+    }
+
+    window.showSidebarOnMobile = function() {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+    };
+
+    function renderActiveChat() {
+      const chat = chats.find(c => c.id === activeChatId);
+      if (!chat) return;
+
+      // Update Header
+      document.getElementById('activeChatTitle').textContent = chat.name;
+      document.getElementById('activeChatSubtitle').textContent = chat.subtitle || (chat.type === 'group' ? 'Grupo' : 'en línea');
+      document.getElementById('activeChatAvatar').src = chat.avatar;
+
+      // Render Messages
+      const container = document.getElementById('messagesContainer');
+      container.innerHTML = '';
+
+      chat.messages.forEach((msg) => {
+        const bubble = document.createElement('div');
+        const isSelf = msg.isSelf;
+
+        bubble.className = `flex gap-2 max-w-[88%] sm:max-w-[75%] ${isSelf ? 'ml-auto justify-end' : 'mr-auto justify-start'}`;
+
+        let innerContent = '';
+
+        if (msg.type === 'image') {
+          innerContent = `<img src="${msg.content}" class="rounded-lg max-h-60 w-full object-cover mb-1 border border-black/10">`;
+        } else if (msg.type === 'video') {
+          innerContent = `<video controls src="${msg.content}" class="rounded-lg max-h-64 w-full object-cover mb-1 border border-black/10"></video>`;
+        } else if (msg.type === 'audio') {
+          innerContent = `<audio controls src="${msg.content}" class="w-full my-1 accent-emerald-600"></audio>`;
+        } else if (msg.type === 'location') {
+          innerContent = `
+            <div class="bg-emerald-50 text-emerald-900 p-2 rounded-lg mb-1 flex items-center gap-2 border border-emerald-200">
+              <i class="fa-solid fa-location-dot text-emerald-600 text-xl"></i>
+              <div>
+                <p class="font-bold text-xs">Ubicación compartida</p>
+                <p class="text-[10px] text-emerald-700">Lat: 40.416, Lon: -3.703</p>
+              </div>
+            </div>`;
+        } else {
+          innerContent = `<p class="text-sm text-slate-800 leading-snug break-words">${escapeHtml(msg.text || '')}</p>`;
+        }
+
+        // Group Sender Title
+        const senderHeader = (chat.type === 'group' && !isSelf) 
+          ? `<p class="text-xs font-bold ${getUserColor(msg.sender)} mb-0.5">~${escapeHtml(msg.sender)}</p>` 
+          : '';
+
+        if (isSelf) {
+          // Outgoing Green Bubble
+          bubble.innerHTML = `
+            <div class="relative bg-wa-lightGreen text-slate-800 p-2.5 px-3 rounded-2xl rounded-tr-none shadow-sm tail-out">
+              ${innerContent}
+              <div class="flex items-center justify-end gap-1 text-[10px] text-slate-500 mt-1 font-semibold">
+                <span>${msg.time}</span>
+                <i class="fa-solid fa-check-double text-wa-blueCheck text-xs"></i>
+              </div>
+            </div>
+          `;
+        } else {
+          // Incoming White Bubble
+          bubble.innerHTML = `
+            <div class="relative bg-white text-slate-800 p-2.5 px-3 rounded-2xl rounded-tl-none shadow-sm tail-in border border-slate-200/60">
+              ${senderHeader}
+              ${innerContent}
+              <div class="text-right text-[10px] text-slate-400 mt-1 font-semibold">
+                ${msg.time}
+              </div>
+            </div>
+          `;
+        }
+
+        container.appendChild(bubble);
+      });
+
+      // Scroll to bottom
+      const feed = document.getElementById('chatFeed');
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    window.handleSendMessage = function(e) {
+      e.preventDefault();
+      const input = document.getElementById('messageInput');
+      const text = input.value.trim();
+
+      if (!text && !pendingAttachment) return;
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      let newMsg = {
+        sender: currentUser.username,
+        avatar: currentUser.avatar,
+        time: timeStr,
+        isSelf: true,
+        type: 'text',
+        text: text
+      };
+
+      if (pendingAttachment) {
+        newMsg.type = pendingAttachment.type;
+        newMsg.content = pendingAttachment.content;
+        newMsg.text = pendingAttachment.fileName;
+      }
+
+      // Add to current active chat
+      const chat = chats.find(c => c.id === activeChatId);
+      if (chat) {
+        chat.messages.push(newMsg);
+      }
+
+      // Clear Inputs
+      input.value = '';
+      clearAttachment();
+      document.getElementById('attachmentPopup').classList.add('hidden');
+
+      renderActiveChat();
+      renderSidebarChats();
+
+      // Broadcast to other tabs
+      if (broadcastChannel) {
+        broadcastChannel.postMessage({
+          type: 'NEW_MESSAGE',
+          chatId: activeChatId,
+          message: { ...newMsg, isSelf: false }
+        });
+      }
+
+      // Save to Firestore if connected
+      if (db) {
+        try {
+          const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
+          addDoc(msgRef, {
+            chatId: activeChatId,
+            ...newMsg,
+            isSelf: false,
+            timestamp: Date.now()
+          });
+        } catch (err) { console.error("Firestore send error:", err); }
+      }
+    };
+
+    function receiveIncomingMessage(chatId, message) {
+      const chat = chats.find(c => c.id === chatId);
+      if (chat) {
+        chat.messages.push(message);
+        if (activeChatId !== chatId) {
+          chat.unread = (chat.unread || 0) + 1;
+        }
+        renderSidebarChats();
+        if (activeChatId === chatId) {
+          renderActiveChat();
+        }
+      }
+    }
+
+    window.toggleAttachmentPopup = function() {
+      document.getElementById('attachmentPopup').classList.toggle('hidden');
+    };
+
+    window.triggerFilePicker = function(type) {
+      document.getElementById('attachmentPopup').classList.add('hidden');
+      const input = document.getElementById('genericFileInput');
+      if (type === 'image') input.accept = 'image/*';
+      else if (type === 'video') input.accept = 'video/*';
+      else if (type === 'audio') input.accept = 'audio/*';
+      else input.accept = '*/*';
+
+      input.click();
+    };
+
+    window.handleFileSelected = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        let type = 'file';
+        if (file.type.startsWith('image/')) type = 'image';
+        else if (file.type.startsWith('video/')) type = 'video';
+        else if (file.type.startsWith('audio/')) type = 'audio';
+
+        pendingAttachment = {
+          type: type,
+          content: evt.target.result,
+          fileName: file.name
+        };
+
+        // Show drawer preview
+        const drawer = document.getElementById('attachmentDrawer');
+        drawer.classList.remove('hidden');
+        document.getElementById('drawerFileName').textContent = file.name;
+        document.getElementById('drawerFileType').textContent = `Adjunto (${type.toUpperCase()})`;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.clearAttachment = function() {
+      pendingAttachment = null;
+      document.getElementById('attachmentDrawer').classList.add('hidden');
+      document.getElementById('genericFileInput').value = '';
+    };
+
+    window.sendLocationMessage = function() {
+      document.getElementById('attachmentPopup').classList.add('hidden');
+      pendingAttachment = {
+        type: 'location',
+        content: '',
+        fileName: 'Ubicación actual'
+      };
+      window.handleSendMessage(new Event('submit'));
+    };
+
+    window.sendContactMessage = function() {
+      document.getElementById('attachmentPopup').classList.add('hidden');
+      document.getElementById('messageInput').value = '📇 Contacto: Juan Pérez (+34 600 000 000)';
+    };
+
+    window.toggleVoiceRecording = async function() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopAndSendVoiceRecording();
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.start();
+        
+        document.getElementById('audioRecordingPanel').classList.remove('hidden');
+        recordingSeconds = 0;
+        document.getElementById('recordingTimer').textContent = '00:00';
+        recordingTimer = setInterval(() => {
+          recordingSeconds++;
+          const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
+          const secs = String(recordingSeconds % 60).padStart(2, '0');
+          document.getElementById('recordingTimer').textContent = `${mins}:${secs}`;
+        }, 1000);
+
+      } catch (err) {
+        showToast("No se pudo acceder al micrófono.", "error");
+      }
+    };
+
+    window.cancelVoiceRecording = function() {
+      if (mediaRecorder) mediaRecorder.stop();
+      clearInterval(recordingTimer);
+      document.getElementById('audioRecordingPanel').classList.add('hidden');
+      audioChunks = [];
+    };
+
+    window.stopAndSendVoiceRecording = function() {
+      if (!mediaRecorder) return;
+
+      mediaRecorder.onstop = () => {
+        clearInterval(recordingTimer);
+        document.getElementById('audioRecordingPanel').classList.add('hidden');
+        
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          pendingAttachment = {
+            type: 'audio',
+            content: evt.target.result,
+            fileName: `Nota de voz (${recordingSeconds}s)`
+          };
+          window.handleSendMessage(new Event('submit'));
+        };
+        reader.readAsDataURL(audioBlob);
+      };
+
+      mediaRecorder.stop();
+    };
+
+    window.handleAuthSubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('authUsername').value.trim();
+      const avatar = document.getElementById('authAvatarPreview').src;
+
+      if (!name) return;
+
+      currentUser = { username: name, avatar: avatar };
+      localStorage.setItem('wa_user', JSON.stringify(currentUser));
+
+      document.getElementById('currentUsernameDisplay').textContent = currentUser.username;
+      document.getElementById('currentUserAvatar').src = currentUser.avatar;
+
+      document.getElementById('authModal').classList.add('hidden');
+      showToast(`¡Bienvenido, ${currentUser.username}!`, 'success');
+      renderSidebarChats();
+    };
+
+    window.openAuthModal = function() {
+      document.getElementById('authModal').classList.remove('hidden');
+    };
+
+    window.setPresetAvatar = function(seed) {
+      document.getElementById('authAvatarPreview').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+    };
+
+    window.handleAvatarFileSelect = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('authAvatarPreview').src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.openGroupModal = function() {
+      document.getElementById('createGroupModal').classList.remove('hidden');
+    };
+
+    window.closeGroupModal = function() {
+      document.getElementById('createGroupModal').classList.add('hidden');
+    };
+
+    window.setGroupPresetIcon = function(emoji) {
+      document.getElementById('groupIconSelected').value = emoji;
+    };
+
+    window.handleCreateGroup = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('groupNameInput').value.trim();
+      const desc = document.getElementById('groupDescInput').value.trim();
+      const icon = document.getElementById('groupIconSelected').value;
+
+      if (!name) return;
+
+      const newGroup = {
+        id: 'group_' + Date.now(),
+        type: 'group',
+        name: `${icon} ${name}`,
+        avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(name)}`,
+        subtitle: desc || 'Grupo recién creado',
+        unread: 0,
+        messages: [
+          { sender: 'Sistema', avatar: currentUser.avatar, text: `Grupo "${name}" creado por ${currentUser.username}.`, time: 'Ahora', isSelf: false, type: 'text' }
+        ]
+      };
+
+      chats.unshift(newGroup);
+      closeGroupModal();
+      selectChat(newGroup.id);
+      showToast('Grupo creado correctamente', 'success');
+    };
+
+    window.openFirebaseModal = function() {
+      document.getElementById('firebaseModal').classList.remove('hidden');
+    };
+
+    window.closeFirebaseModal = function() {
+      document.getElementById('firebaseModal').classList.add('hidden');
+    };
+
+    window.saveFirebaseConfig = function() {
+      const val = document.getElementById('firebaseConfigInput').value.trim();
+      if (!val) return;
+      try {
+        JSON.parse(val);
+        localStorage.setItem('custom_firebase_config', val);
+        showToast('Configuración guardada. Reiniciando sincronización...', 'success');
+        closeFirebaseModal();
+        setTimeout(() => location.reload(), 1000);
+      } catch (err) {
+        showToast('JSON inválido. Revisa la configuración.', 'error');
+      }
+    };
+
+    window.filterChatsList = function() {
+      const q = document.getElementById('chatSearchInput').value.toLowerCase();
+      const items = document.getElementById('chatsListContainer').children;
+      chats.forEach((chat, idx) => {
+        if (items[idx]) {
+          const match = chat.name.toLowerCase().includes(q);
+          items[idx].style.display = match ? 'flex' : 'none';
+        }
+      });
+    };
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      })[m]);
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-emerald-600 text-white',
+        error: 'bg-rose-600 text-white',
+        info: 'bg-slate-800 text-slate-100 border border-slate-700'
+      };
+
+      toast.className = `${colors[type]} text-xs font-semibold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transition-all duration-300 pointer-events-auto`;
+      toast.innerHTML = `<span>${escapeHtml(msg)}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      initSyncEngine();
+
+      const savedUser = localStorage.getItem('wa_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          document.getElementById('currentUsernameDisplay').textContent = currentUser.username;
+          document.getElementById('currentUserAvatar').src = currentUser.avatar;
+          document.getElementById('authModal').classList.add('hidden');
+        } catch(e) {}
+      }
+
+      renderSidebarChats();
+      renderActiveChat();
+    });
+  </script>
+</body>
+</html>
